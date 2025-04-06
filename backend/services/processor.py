@@ -54,26 +54,39 @@ async def process_webpage_content(text: str, url: str) -> Dict[str, str]:
     Your response must be a valid JSON object with the following fields:
     - title: A short, catchy title that captures the essence of the content
     - description: A brief description (2-3 sentences) summarizing the key points
-    - prompt: A detailed prompt for an image generation model that visualizes the content
+    - prompt: A detailed prompt for an image that balances artistic quality with informational content
     
-    The image prompt should be detailed, descriptive, and capture the main theme of the content.
+    For the image prompt, follow these guidelines:
+    1. Begin with a balanced direction (e.g., "A visual scene that equally blends artistry and information about...", "A conceptual illustration that tells the story of...")
+    2. Balance visual appeal with 2-3 key concepts from the webpage
+    3. Create an exact 50/50 blend of artistic elements and informational components
+    4. Use minimal text - only 1-2 essential words/labels if absolutely necessary
+    5. Rely primarily on visual metaphors, symbols, and composition to convey information
+    6. Suggest a rich color palette that naturally guides the viewer through the information
+    7. The image should be exactly 50% artistic/visual and 50% informational
+    
+    The prompt should be 2-3 sentences long and focus on creating a visually engaging image that subtly incorporates key information.
+    IMPORTANT: Avoid any controversial, violent, or sensitive content in the prompt.
     """
     
     user_message = f"""
     URL: {url}
     
-    Content: {text[:1000]}...
+    Content: {text[:1500]}...
     
     Please analyze this content and return a JSON object with the following fields:
     - title: A short, catchy title
     - description: A brief summary (2-3 sentences)
-    - prompt: A detailed image generation prompt
+    - prompt: A prompt for an image that balances artistic quality with subtle informational elements
+    
+    For the prompt, create an image that perfectly balances visual appeal (50%) with informational clarity (50%).
+    The image should use minimal text while effectively communicating key concepts through visual storytelling and symbolism.
     
     Example format:
     {{
-        "title": "Sample Title",
-        "description": "This is a sample description.",
-        "prompt": "A detailed image prompt."
+        "title": "The Digital Revolution in Music",
+        "description": "Streaming platforms have transformed how music is distributed and consumed globally. Artists now reach wider audiences directly while listeners enjoy unprecedented access to diverse musical catalogs.",
+        "prompt": "A balanced scene depicting digital music distribution. Create a flowing landscape where musical notes transform into digital particles connecting devices and human figures. On one side, show artists creating music; on the other, show listeners experiencing it, with streaming platforms visualized as a bridge between them. Use rich blues and purples with golden accents for data points. Include visual symbols for key concepts: a globe for global reach, connecting pathways for distribution, and diverse music genres represented by distinct instruments. Use at most 1-2 essential labels if needed. The composition should guide the viewer's eye through the music distribution process while maintaining visual beauty."
     }}
     """
     
@@ -85,7 +98,6 @@ async def process_webpage_content(text: str, url: str) -> Dict[str, str]:
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
             ],
-            temperature=0.7,
             response_format={"type": "json_object"}
         )
         

@@ -23,12 +23,15 @@ async def generate_image(prompt: str) -> str:
     """
     try:
         # Call OpenAI API to generate image
+        # Add a prefix to guide the balance between artistic and informational content
+        balanced_prompt = f"Create an image with equal parts artistic beauty and informational clarity (50/50). Use minimal text (1-2 words maximum) and rely on visual storytelling: {prompt}"
+        
         response = await client.images.generate(
             model="dall-e-3",
-            prompt=prompt,
+            prompt=balanced_prompt,
             n=1,
-            size="1024x1024",
-            quality="standard"
+            size="1024x1024",  # Standard square format
+            quality="hd"       # Higher quality for better visual appeal
         )
         
         # Return the URL of the generated image

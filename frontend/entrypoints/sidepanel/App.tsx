@@ -1,4 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// Add animation keyframes
+const keyframes = `
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+`;
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -9,6 +26,37 @@ function App() {
   const [imageUrl, setImageUrl] = useState("");
   const [processingStep, setProcessingStep] = useState("");
   const [showFullScreen, setShowFullScreen] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  // Reset success animation when needed
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        // Keep success state but remove animation after 2 seconds
+        document.getElementById('success-message')?.classList.remove('animate-pulse');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  // Simulate progress during loading
+  useEffect(() => {
+    if (loading) {
+      setProgress(0);
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(interval);
+            return prev;
+          }
+          return prev + Math.random() * 15;
+        });
+      }, 500);
+      return () => clearInterval(interval);
+    } else if (success) {
+      setProgress(100);
+    }
+  }, [loading, success]);
 
   const handleExtractAndProcess = async () => {
     setLoading(true);
@@ -16,6 +64,7 @@ function App() {
     setSuccess(false);
     setProcessedContent(null);
     setImageUrl("");
+    setProgress(0);
     setProcessingStep("Extracting text...");
 
     try {
@@ -75,6 +124,8 @@ function App() {
         // Store the image URL separately
         setImageUrl(chainResult.image.image_url);
         setSuccess(true);
+        // Add a success message
+        setProcessingStep("Image successfully generated!");
       } catch (err) {
         console.error("Content script error:", err);
         setError(
@@ -96,6 +147,7 @@ function App() {
 
   return (
     <div className="p-4 max-w-md mx-auto bg-white min-h-screen">
+      <style>{keyframes}</style>
       <div className="flex justify-center items-center mb-4">
         <img src="/origami.svg" alt="Icon" className="h-5 w-5 mr-2" />
         <h1 className="text-base font-bold text-gray-800">Page2Pixel</h1>
@@ -109,19 +161,49 @@ function App() {
             loading ? "opacity-70 cursor-not-allowed" : ""
           }`}
         >
-          {loading ? `${processingStep}` : "Generate Image"}
+          {loading ? (
+            <div className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {processingStep}
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Generate Image
+            </div>
+          )}
         </button>
       </div>
+      
+      {/* Progress bar */}
+      {loading && (
+        <div className="w-full bg-gray-200 rounded-full h-1.5 mb-4 overflow-hidden">
+          <div 
+            className="bg-gradient-to-r from-green-400 to-blue-400 h-1.5 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      )}
+      
+
 
       {error && (
-        <div className="bg-red-50 text-red-700 p-3 rounded-md mt-4 border border-red-200">
+        <div className="bg-red-50 text-red-700 p-3 rounded-md mt-4 border border-red-200 flex items-center" style={{ animation: 'fadeIn 0.3s ease-out' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+          </svg>
           {error}
         </div>
       )}
 
       {/* Display the processed content */}
       {processedContent && (
-        <div className="mt-6 bg-white p-5 rounded-md shadow-sm border border-gray-200 transition-all duration-300">
+        <div className="mt-6 bg-white p-5 rounded-md shadow-sm border border-gray-200 transition-all duration-300" style={{ animation: 'slideUp 0.5s ease-out' }}>
           <h2 className="text-lg font-semibold text-gray-800 mb-2">
             {processedContent.title}
           </h2>
@@ -157,7 +239,7 @@ function App() {
 
       {/* Display the image in a separate box */}
       {imageUrl && (
-        <div className="mt-6 bg-white p-5 rounded-md shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md">
+        <div className="mt-6 bg-white p-5 rounded-md shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-md" style={{ animation: 'slideUp 0.7s ease-out' }}>
           <div
             onClick={toggleFullScreen}
             className="cursor-pointer relative overflow-hidden rounded-md border border-gray-200 hover:shadow-md transition-all duration-300"
