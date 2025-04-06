@@ -14,18 +14,8 @@ client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # Store the last processed result
 last_processed = {"title": "", "description": "", "prompt": ""}
 
-# Create a directory for storing processed content
-os.makedirs("processed_content", exist_ok=True)
-
-def save_processed_content(content, url):
-    """Save processed content to a JSON file"""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"processed_content/{timestamp}_{url.replace('://', '_').replace('/', '_')[:50]}.json"
-    
-    with open(filename, "w") as f:
-        json.dump(content, f, indent=2)
-    
-    return filename
+# Store the last processed result in memory
+last_processed = {"title": "", "description": "", "prompt": ""}
 
 async def process_webpage_content(text: str, url: str) -> Dict[str, str]:
     """
@@ -108,9 +98,8 @@ async def process_webpage_content(text: str, url: str) -> Dict[str, str]:
         global last_processed
         last_processed = result
         
-        # Save processed content to a JSON file
-        filename = save_processed_content(result, url)
-        print(f"Processed content saved to {filename}")
+        # Log processing completion
+        print(f"Processed content for {url[:50]}...")
         
         return result
         
