@@ -1,0 +1,5 @@
+{
+  "title": "Page2Pixel API: Transforming Web Content into Visuals",
+  "description": "The Page2Pixel API facilitates the extraction of webpage content and its conversion into images through various endpoints. It offers functionalities like storing content, processing it, generating images, and checking the API's health, making it a comprehensive tool for developers looking to enhance their applications with visual representations of web data.",
+  "prompt": "An abstract representation of a digital API interface showcasing various endpoints such as 'Store Content', 'Process Content', and 'Generate Image'. Visualize a futuristic control panel with icons representing web pages, images, and data processing, alongside elements symbolizing connectivity and technology, all set against a sleek, modern background."
+}
